@@ -17,9 +17,8 @@ In MDLMs, repeated padding can blur the boundary between emptiness and ending. T
 
 ## Method
 
-<p align="center">
-  <img src="figures/void_padding_overview.png" alt="VoidPadding overview" width="420">
-</p>
+
+![VoidPadding overview](figures/void_padding_overview.png)
 
 **VoidPadding** uses `[VOID]` for padding and reserves `[EOS]` for semantic
 termination in masked diffusion language models. At inference, `[VOID]`
