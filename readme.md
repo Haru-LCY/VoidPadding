@@ -5,7 +5,7 @@
 [![LLaDA Void](https://img.shields.io/badge/🤗%20Model-LLaDA%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
 
 <p align="center">
-  <img src="figures/voidpadding.png" alt="VoidPadding logo" width="350">
+  <img src="figures/voidpadding.png" alt="VoidPadding logo" width="400">
 </p>
 
 > **「假作真時真亦假，無為有處有還無。」 —《紅樓夢》太虛幻境**
