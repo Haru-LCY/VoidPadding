@@ -34,6 +34,8 @@ This gives VoidPadding three practical advantages:
 
 ## Main Results
 
+Our main experiments evaluate VoidPadding on **LLaDA-8B-Instruct** and **Dream-7B-Instruct**, where it improves fixed-length robustness and short-canvas expansion. Additional scripts are provided to reproduce the appendix experiments on **LLaDA-8B-Base** and **Dream-7B-Base**.
+
 
 ### Fixed-Length Evaluation
 
@@ -58,21 +60,32 @@ For efficiency, we report the NFE reduction of VoidPadding relative to Original/
 
 ### Short-Canvas Expansion
 
-| Model | Method | GSM8K | MATH500 | HumanEval | MBPP | Mean |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| LLaDA | Fixed-64 | 60.20 | 26.80 | 29.27 | 41.27 | 39.38 |
-| LLaDA | `rho-[EOS]` | 73.39 | 27.00 | 40.24 | 41.38 | 45.50 |
-| LLaDA | Daedal | 79.38 | 37.40 | 44.51 | 41.79 | 50.77 |
-| LLaDA | VoidExpansion | 78.32 | 39.60 | 42.07 | 45.38 | 51.34 |
-| Dream | Fixed-64 | 53.22 | 22.80 | 43.90 | 49.00 | 42.23 |
-| Dream | VoidExpansion | 79.08 | 44.00 | 60.98 | 57.40 | 60.37 |
+All methods in this section use an initial response canvas length of 64 and a decoding block size of 32.
+
+#### LLaDA
+
+DAEDAL and rho-[EOS] are inference-only variable-length generation baselines whose released implementations support LLaDA, so we compare them on LLaDA. VoidExpansion achieves the best mean score, improving over Fixed-64 by +11.96, over rho-[EOS] by +5.84, and over DAEDAL by +0.57.
+
+![LLaDA short-canvas expansion accuracy](figures/expansion_acc.png)
+
+VoidExpansion also reduces average NFE from 228.82 to 172.10 relative to DAEDAL, with a 2.12× mean wall-clock speedup.
+
+![LLaDA short-canvas expansion efficiency](figures/expansion_eff.png)
+
+#### Dream
+
+For Dream, we compare the Fixed-64 baseline with VoidExpansion. VoidExpansion improves the mean score from 42.23 to 60.37, a gain of +18.14.
+
+| Method        | GSM8K | MATH500 | HumanEval |  MBPP |  Mean |
+| ------------- | ----: | ------: | --------: | ----: | ----: |
+| Fixed-64      | 53.22 |   22.80 |     43.90 | 49.00 | 42.23 |
+| VoidExpansion | 79.08 |   44.00 |     60.98 | 57.40 | 60.37 |
 
 
 
 ## What Is Included
 
 ```text
-.
 ├── main.py                         # LoRA SFT entrypoint
 ├── method/                         # Void/Rainbow/EOS padding training logic
 ├── eval/                           # LLaDA and Dream lm-eval wrappers
