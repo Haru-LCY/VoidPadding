@@ -34,63 +34,27 @@ This gives VoidPadding three practical advantages:
 
 ## Main Results
 
-VoidPadding is the strongest fixed-length method on both instruction-tuned
-backbones, and it also makes short-canvas expansion more reliable.
 
-### Fixed-Length Robustness
+### Fixed-Length Evaluation
+
+We evaluate fixed-length robustness and efficiency with generation length fixed to 512 and block size varied over 64, 128, and 512. Darker bars denote smaller blocks, and the Avg. panel reports the mean over GSM8K, MATH500, HumanEval, and MBPP. VoidPadding achieves block-averaged Avg. gains of +7.06/+3.59 on LLaDA and +17.84/+6.95 on Dream over Original/RainbowPadding.
+
 
 #### LLaDA
 
-| Task            | Method         |         B=64 |        B=128 |        B=512 |         Mean |
-| --------------- | -------------- | -----------: | -----------: | -----------: | -----------: |
-| GSM8K           | Original       | <u>76.80</u> |        70.96 |        28.43 |        58.73 |
-| GSM8K           | RainbowPadding |        74.53 | <u>73.39</u> | <u>66.57</u> | <u>71.50</u> |
-| GSM8K           | VoidPadding    |    **77.79** |    **78.39** |    **78.62** |    **78.27** |
-| MATH500         | Original       | <u>39.60</u> | <u>37.60</u> |        16.60 |        31.27 |
-| MATH500         | RainbowPadding |        33.20 |        34.00 |    **27.80** | <u>31.67</u> |
-| MATH500         | VoidPadding    |    **40.60** |    **41.60** | <u>27.60</u> |    **36.60** |
-| HumanEval       | Original       | <u>42.68</u> |    **43.90** |    **44.51** |    **43.70** |
-| HumanEval       | RainbowPadding |    **43.90** | <u>43.29</u> |        35.98 |        41.06 |
-| HumanEval       | VoidPadding    |        41.46 |        42.07 | <u>41.46</u> | <u>41.66</u> |
-| MBPP            | Original       |        41.48 |        39.12 |        37.68 |        39.43 |
-| MBPP            | RainbowPadding | <u>42.71</u> | <u>43.02</u> | <u>42.51</u> | <u>42.75</u> |
-| MBPP            | VoidPadding    |    **44.66** |    **44.87** |    **44.97** |    **44.83** |
-| Mean over tasks | Original       | <u>50.14</u> |        47.90 |        31.81 |        43.28 |
-| Mean over tasks | RainbowPadding |        48.59 | <u>48.43</u> | <u>43.22</u> | <u>46.75</u> |
-| Mean over tasks | VoidPadding    |    **51.13** |    **51.73** |    **48.16** |    **50.34** |
-
+![LLaDA fixed-length robustness](figures/llada.png)
 
 #### Dream
 
-| Task            | Method         |         B=64 |        B=128 |        B=512 |         Mean |
-| --------------- | -------------- | -----------: | -----------: | -----------: | -----------: |
-| GSM8K           | Original       |        73.39 |        33.89 |        46.70 |        51.33 |
-| GSM8K           | RainbowPadding | <u>79.15</u> | <u>77.63</u> | <u>52.16</u> | <u>69.65</u> |
-| GSM8K           | VoidPadding    |    **80.44** |    **80.89** |    **78.09** |    **79.81** |
-| MATH500         | Original       | <u>43.20</u> | <u>41.20</u> |        26.00 | <u>36.80</u> |
-| MATH500         | RainbowPadding |        33.60 |        33.40 | <u>31.40</u> |        32.80 |
-| MATH500         | VoidPadding    |    **44.00** |    **44.20** |    **45.20** |    **44.47** |
-| HumanEval       | Original       |    **62.80** |    **60.37** |        18.90 |        47.36 |
-| HumanEval       | RainbowPadding |    **62.80** |    **60.37** | <u>50.00</u> | <u>57.72</u> |
-| HumanEval       | VoidPadding    | <u>59.76</u> | <u>59.15</u> |    **60.37** |    **59.76** |
-| MBPP            | Original       |        41.00 |        31.00 |        30.00 |        34.00 |
-| MBPP            | RainbowPadding | <u>56.00</u> | <u>54.80</u> | <u>47.80</u> | <u>52.87</u> |
-| MBPP            | VoidPadding    |    **57.60** |    **58.00** |    **54.80** |    **56.80** |
-| Mean over tasks | Original       |        55.10 |        41.62 |        30.40 |        42.37 |
-| Mean over tasks | RainbowPadding | <u>57.89</u> | <u>56.55</u> | <u>45.34</u> | <u>53.26</u> |
-| Mean over tasks | VoidPadding    |    **60.45** |    **60.56** |    **59.62** |    **60.21** |
+![Dream fixed-length robustness](figures/dream.png)
 
+For efficiency, we report the NFE reduction of VoidPadding relative to Original/RainbowPadding, averaged over block sizes 64, 128, and 512.
 
-### Fixed-Length Efficiency
+| Backbone | GSM8K | MATH500 | HumanEval |  MBPP |  Avg. |
+| -------- | ----: | ------: | --------: | ----: | ----: |
+| LLaDA    | 75.0% |   13.5% |     80.4% | 86.4% | 63.8% |
+| Dream    | 69.3% |   27.5% |     41.3% | 84.6% | 55.7% |
 
-Dream average NFE over \(B\in\{64,128,512\}\):
-
-| Benchmark | VanillaStopping / RainbowPadding | VoidPadding | NFE Reduction |
-| --- | ---: | ---: | ---: |
-| GSM8K | 512.0 | 157.3 | 69.3% |
-| MATH500 | 512.0 | 371.0 | 27.5% |
-| HumanEval | 512.0 | 300.7 | 41.3% |
-| MBPP | 512.0 | 78.7 | 84.6% |
 
 ### Short-Canvas Expansion
 
