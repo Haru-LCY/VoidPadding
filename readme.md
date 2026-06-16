@@ -4,36 +4,30 @@
 [![Dream Void](https://img.shields.io/badge/🤗%20Model-Dream%20Void-yellow)](https://huggingface.co/akpon900/dream-instruct-void)
 [![LLaDA Void](https://img.shields.io/badge/🤗%20Model-LLaDA%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
 
+![](figures/voidpadding.png)
+
+> **「假作真時真亦假，無為有處有還無。」 —《紅樓夢》太虛幻境**
+
+In MDLMs, repeated padding can blur the boundary between emptiness and ending. This ambiguity can cause `[EOS]` overflow, a common failure mode where the model overproduces `[EOS]` under large-block decoding.
+
+**VoidPadding** decouples padding from termination: `[VOID]` represents padded emptiness, while `[EOS]` marks semantic endings. By separating these signals, VoidPadding mitigates `[EOS]` overflow under large-block decoding, while using `[VOID]` as a learned length signal for adaptive canvas expansion.
+
+
+## Method
+
 ![VoidPadding overview](figures/void_padding_overview.png)
 
-## Overview
+**VoidPadding** uses `[VOID]` for padding and reserves `[EOS]` for semantic
+termination in masked diffusion language models. At inference, `[VOID]`
+generation is banned.
 
-MDLMs generate by denoising a preallocated masked response canvas. During
-instruction tuning, existing MDLM pipelines often follow the autoregressive
-convention of padding responses with repeated `[EOS]` tokens. In MDLMs, those
-padding tokens are visible training targets under bidirectional denoising, so
-`[EOS]` learns two roles at once:
+This gives VoidPadding three practical advantages:
 
-- semantic terminator
-- response-length / padding signal
-
-This role coupling causes **EOS overflow** under large-block decoding: the model
-commits high-confidence tail `[EOS]` tokens early, then the committed EOS suffix
-encourages more EOS predictions to spread leftward, collapsing the effective
-response.
-
-VoidPadding decouples the roles:
-
-- `[EOS]` is used only as the semantic terminator.
-- `[VOID]` is used as the padding token during instruction tuning.
-- `[VOID]` generation is banned at inference, keeping it as a hidden length
-  signal rather than visible output.
-- `[EOS]`Termination stops once all masks before the leftmost visible `[EOS]`
-  are filled, then discards the unused tail.
-- VoidExpansion uses the learned `[VOID]` tail signal to expand an insufficient
-  response canvas before generation.
-
-
+- **Prevents EOS overflow.**
+- **Makes `[EOS]` a reliable terminator,** enabling more efficient decoding with
+  less wasted generation.
+- **Enables VOID-based canvas expansion** by using the learned `[VOID]` signal
+  to detect when the current response canvas is too short.
 
 ## Main Results
 
