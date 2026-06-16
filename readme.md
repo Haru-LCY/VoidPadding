@@ -4,7 +4,9 @@
 [![Dream Void](https://img.shields.io/badge/🤗%20Model-Dream%20Void-yellow)](https://huggingface.co/akpon900/dream-instruct-void)
 [![LLaDA Void](https://img.shields.io/badge/🤗%20Model-LLaDA%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
 
-![](figures/voidpadding.png)
+<p align="center">
+  <img src="figures/voidpadding.png" alt="VoidPadding logo" width="350">
+</p>
 
 > **「假作真時真亦假，無為有處有還無。」 —《紅樓夢》太虛幻境**
 
@@ -15,7 +17,9 @@ In MDLMs, repeated padding can blur the boundary between emptiness and ending. T
 
 ## Method
 
-![VoidPadding overview](figures/void_padding_overview.png)
+<p align="center">
+  <img src="figures/void_padding_overview.png" alt="VoidPadding overview" width="420">
+</p>
 
 **VoidPadding** uses `[VOID]` for padding and reserves `[EOS]` for semantic
 termination in masked diffusion language models. At inference, `[VOID]`
