@@ -1,0 +1,1 @@
+from importlib import import_module; train = lambda method, args: import_module(f"{__name__}.{method}").train(args)
