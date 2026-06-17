@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="VoidPadding lets [VOID] handle padding in masked diffusion language models so that [EOS] can focus on semantic termination.">
+    <meta property="og:title" content="VoidPadding">
+    <meta property="og:description" content="Decoupling padded emptiness from semantic termination for masked diffusion language models.">
+    <meta property="og:image" content="figures/voidpadding.png">
+    <title>VoidPadding</title>
+    <style>
+      :root {
+        --ink: #10243f;
+        --muted: #5a6d83;
+        --line: #cdddf0;
+        --paper: #f7fbff;
+        --panel: #ffffff;
+        --accent: #2563eb;
+        --accent-2: #0284c7;
+        --accent-3: #60a5fa;
+        --shadow: 0 18px 48px rgba(37, 99, 235, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: var(--paper);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .wrap {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid rgba(216, 224, 232, 0.86);
+        background: rgba(251, 252, 253, 0.9);
+        backdrop-filter: blur(16px);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 64px;
+        gap: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        display: inline-grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 8px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        font-size: 18px;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+      }
+
+      .nav-links a:hover {
+        color: var(--ink);
+      }
+
+      .hero {
+        padding: 74px 0 40px;
+        border-bottom: 1px solid var(--line);
+        background:
+          radial-gradient(circle at 10% 12%, rgba(96, 165, 250, 0.28), transparent 34%),
+          linear-gradient(180deg, #fff 0%, #edf6ff 100%);
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
+        gap: 48px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 860px;
+        font-size: 86px;
+        line-height: 0.94;
+        letter-spacing: 0;
+      }
+
+      .hero-logo-title {
+        display: block;
+        width: min(620px, 100%);
+        height: auto;
+      }
+
+      .subtitle {
+        margin: 24px 0 0;
+        max-width: 690px;
+        color: #263f5f;
+        font-size: 24px;
+        line-height: 1.35;
+      }
+
+      .authors {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .affiliation {
+        margin: 8px 0 0;
+        color: #263f5f;
+        font-size: 15px;
+      }
+
+      .contact {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 30px;
+      }
+
+      .contributions {
+        display: grid;
+        gap: 14px;
+      }
+
+      .contribution {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 14px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 10px 28px rgba(37, 99, 235, 0.09);
+      }
+
+      .contribution b {
+        display: inline-grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        font-size: 15px;
+      }
+
+      .contribution p {
+        margin: 0;
+        color: #263f5f;
+        font-size: 15px;
+        line-height: 1.48;
+      }
+
+      .contribution strong {
+        color: var(--ink);
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 17px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-weight: 750;
+        text-decoration: none;
+        box-shadow: 0 8px 22px rgba(37, 99, 235, 0.08);
+        transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .button.primary {
+        border-color: var(--line);
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .button:hover,
+      .button:focus-visible {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.18);
+        outline: none;
+      }
+
+      .button.primary:hover,
+      .button.primary:focus-visible {
+        border-color: #1d4ed8;
+        background: #1d4ed8;
+      }
+
+      section {
+        padding: 70px 0;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.84fr) minmax(260px, 0.5fr);
+        gap: 36px;
+        align-items: end;
+        margin-bottom: 30px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 46px;
+        line-height: 1.04;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .feature {
+        min-height: 172px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      .feature h3 {
+        margin: 0 0 10px;
+        font-size: 19px;
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .figure-band {
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: #eaf4ff;
+      }
+
+      .figure-box {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 12px 34px rgba(37, 99, 235, 0.09);
+      }
+
+      .figure-box img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .caption {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .result-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+
+      .metric-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 26px;
+      }
+
+      .metric {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .metric strong {
+        display: block;
+        color: var(--accent);
+        font-size: 28px;
+        line-height: 1;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 9px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .models {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+      }
+
+      .model-link {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        text-decoration: none;
+      }
+
+      .model-link strong {
+        display: block;
+        font-size: 20px;
+      }
+
+      .model-link span {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+      }
+
+      .model-link b {
+        color: var(--accent);
+        white-space: nowrap;
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 0;
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #111827;
+        color: #e5e7eb;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .citation {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr);
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .cite-note {
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .cite-note p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .cite-note h2 {
+        margin-bottom: 14px;
+        font-size: 30px;
+      }
+
+      footer {
+        padding: 30px 0 42px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 14px 0;
+        }
+
+        .nav-links {
+          width: 100%;
+          overflow-x: auto;
+          padding-bottom: 2px;
+        }
+
+        .hero-grid,
+        .section-head,
+        .citation {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          padding-top: 46px;
+        }
+
+        h1 {
+          font-size: 58px;
+        }
+
+        h2 {
+          font-size: 38px;
+        }
+
+        .subtitle {
+          font-size: 21px;
+        }
+
+        .feature-grid,
+        .result-grid,
+        .models,
+        .metric-strip {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .wrap {
+          width: min(100% - 26px, 1120px);
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        section {
+          padding: 52px 0;
+        }
+
+        h1 {
+          font-size: 44px;
+        }
+
+        h2 {
+          font-size: 31px;
+        }
+
+        .subtitle {
+          font-size: 19px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <nav class="wrap nav" aria-label="Main navigation">
+        <a class="brand" href="#top" aria-label="VoidPadding home">
+          <span class="brand-mark">V</span>
+          <span>VoidPadding</span>
+        </a>
+        <div class="nav-links">
+          <a href="#method">Method</a>
+          <a href="#results">Results</a>
+          <a href="#models">Models</a>
+          <a href="#citation">Citation</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="eyebrow">Masked diffusion language models</p>
+            <h1>
+              <img class="hero-logo-title" src="figures/voidpadding.png" alt="VoidPadding">
+            </h1>
+            <p class="subtitle">Let <strong>[VOID]</strong> Handle Padding in Masked Diffusion Language Models so that <strong>[EOS]</strong> Can Focus on Semantic Termination</p>
+            <p class="authors">Chunyu Liu, Zhengyang Fan, Kaisen Yang, Alex Lamb<sup>*</sup></p>
+            <p class="affiliation">Tsinghua University</p>
+            <p class="contact"><sup>*</sup>Corresponding author: <a href="mailto:lambalex@tsinghua.edu.cn">lambalex@tsinghua.edu.cn</a><br>Contact: <a href="mailto:liucy24@mails.tsinghua.edu.cn">liucy24@mails.tsinghua.edu.cn</a>, <a href="mailto:fzy24@mails.tsinghua.edu.cn">fzy24@mails.tsinghua.edu.cn</a>, <a href="mailto:yks23@mails.tsinghua.edu.cn">yks23@mails.tsinghua.edu.cn</a></p>
+            <div class="actions" aria-label="Project links">
+              <a class="button primary" href="https://arxiv.org/abs/2606.17999">Paper</a>
+              <a class="button" href="https://github.com/Haru-LCY/VoidPadding">Code</a>
+              <a class="button" href="https://huggingface.co/akpon900/llada-instruct-void">LLaDA adapter</a>
+              <a class="button" href="https://huggingface.co/akpon900/dream-instruct-void">Dream adapter</a>
+            </div>
+          </div>
+          <div class="contributions" aria-label="Key contributions">
+            <article class="contribution">
+              <b>1</b>
+              <p>We systematically analyze the mechanism behind [EOS] overflow and show that it stems from the dual use of [EOS] for termination and padding during instruction tuning.</p>
+            </article>
+            <article class="contribution">
+              <b>2</b>
+              <p>We propose <strong>VoidPadding</strong>, a training-inference co-design that decouples the two roles by using [VOID] for padding and reserving [EOS] for termination, enabling <strong>[EOS]Termination</strong> for early stopping and VoidExpansion for adaptive canvas expansion.</p>
+            </article>
+            <article class="contribution">
+              <b>3</b>
+              <p>Experiments show that <strong>VoidPadding</strong> prevents [EOS] overflow, improves generation quality and decoding efficiency, and remains robust across block sizes and canvas lengths.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="method">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Separate emptiness from ending.</h2>
+            <p class="lead">Repeated padding blurs the boundary between padded canvas and true response termination. VoidPadding gives those signals different tokens.</p>
+          </div>
+          <div class="feature-grid">
+            <article class="feature">
+              <h3>[VOID] for padding</h3>
+              <p>Training uses a dedicated token for padded emptiness, giving the model a direct representation of unused response canvas.</p>
+            </article>
+            <article class="feature">
+              <h3>[EOS] for meaning</h3>
+              <p>Semantic termination stays assigned to [EOS], reducing pressure for the same token to encode padding and ending.</p>
+            </article>
+            <article class="feature">
+              <h3>Inference stays clean</h3>
+              <p>[VOID] generation is banned at inference while its probability becomes a useful signal for adaptive canvas expansion.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="figure-band">
+        <div class="wrap">
+          <div class="figure-box">
+            <img src="figures/void_padding_overview.png" alt="Overview of VoidPadding training and inference">
+          </div>
+          <p class="caption">VoidPadding decouples padded emptiness from semantic termination in masked diffusion language models.</p>
+        </div>
+      </section>
+
+      <section id="results">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>More reliable termination, less wasted generation.</h2>
+            <p class="lead">Evaluation covers LLaDA-8B-Instruct and Dream-7B-Instruct across math and code benchmarks.</p>
+          </div>
+          <div class="metric-strip">
+            <div class="metric">
+              <strong>63.8%</strong>
+              <span>Average NFE reduction for LLaDA vs. Original/RainbowPadding</span>
+            </div>
+            <div class="metric">
+              <strong>55.7%</strong>
+              <span>Average NFE reduction for Dream vs. Original/RainbowPadding</span>
+            </div>
+            <div class="metric">
+              <strong>+5.84</strong>
+              <span>LLaDA expansion mean score gain over rho-[EOS]</span>
+            </div>
+            <div class="metric">
+              <strong>60.37</strong>
+              <span>Dream VoidExpansion mean score from a 64-token canvas</span>
+            </div>
+          </div>
+          <div class="result-grid">
+            <div>
+              <div class="figure-box">
+                <img src="figures/llada.png" alt="LLaDA fixed-length robustness results">
+              </div>
+              <p class="caption">Fixed-length robustness on LLaDA-8B-Instruct.</p>
+            </div>
+            <div>
+              <div class="figure-box">
+                <img src="figures/dream.png" alt="Dream fixed-length robustness results">
+              </div>
+              <p class="caption">Fixed-length robustness on Dream-7B-Instruct.</p>
+            </div>
+            <div>
+              <div class="figure-box">
+                <img src="figures/expansion_acc.png" alt="Short-canvas expansion accuracy results">
+              </div>
+              <p class="caption">Short-canvas expansion accuracy for LLaDA.</p>
+            </div>
+            <div>
+              <div class="figure-box">
+                <img src="figures/expansion_eff.png" alt="Short-canvas expansion efficiency results">
+              </div>
+              <p class="caption">Short-canvas expansion efficiency for LLaDA.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="models">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Released adapters and reproducible scripts.</h2>
+            <p class="lead">The repository includes training, merging, and evaluation scripts for LLaDA and Dream backbones.</p>
+          </div>
+          <div class="models">
+            <a class="model-link" href="https://huggingface.co/akpon900/llada-instruct-void">
+              <span>
+                <strong>LLaDA Void</strong>
+                <span>LoRA adapter for LLaDA-8B-Instruct</span>
+              </span>
+              <b>Open</b>
+            </a>
+            <a class="model-link" href="https://huggingface.co/akpon900/dream-instruct-void">
+              <span>
+                <strong>Dream Void</strong>
+                <span>LoRA adapter for Dream-7B-Instruct</span>
+              </span>
+              <b>Open</b>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="citation">
+        <div class="wrap citation">
+          <pre><code>@misc{voidpadding2026,
+  title  = {VoidPadding: Let [VOID] Handle Padding in Masked Diffusion Language Models so that [EOS] Can Focus on Semantic Termination},
+  author = {Chunyu Liu and Zhengyang Fan and Kaisen Yang and Alex Lamb},
+  year   = {2026}
+}</code></pre>
+          <div class="cite-note">
+            <h2>Cite VoidPadding</h2>
+            <p>If this work helps your research, please cite the paper and link back to the repository.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">VoidPadding. Code and adapters are released for research use.</div>
+    </footer>
+  </body>
+</html>
