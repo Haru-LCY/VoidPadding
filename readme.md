@@ -2,8 +2,8 @@
 
 [![arXiv](https://img.shields.io/badge/arXiv-2606.17999-b31b1b.svg)](https://arxiv.org/abs/2606.17999)
 [![Dataset](https://img.shields.io/badge/🤗%20Dataset-Tokenized%20VoidPadding-yellow)](https://huggingface.co/datasets/akpon900/Tokenized_VoidPadding_Data)
-[![Dream Instruct Void](https://img.shields.io/badge/🤗%20Model-Dream%20Instruct%20Void-yellow)](https://huggingface.co/akpon900/dream-instruct-void)
-[![LLaDA Instruct Void](https://img.shields.io/badge/🤗%20Model-LLaDA%20Instruct%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
+[![Dream Void](https://img.shields.io/badge/🤗%20Model-Dream%20Void-yellow)](https://huggingface.co/akpon900/dream-instruct-void)
+[![LLaDA Void](https://img.shields.io/badge/🤗%20Model-LLaDA%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
 
 <p align="center">
   <img src="figures/voidpadding.png" alt="VoidPadding logo" width="400">
