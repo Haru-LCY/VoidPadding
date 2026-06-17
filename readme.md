@@ -1,11 +1,10 @@
-# VoidPadding
+# VoidPadding: Let [VOID] Handle Padding in Masked Diffusion Language Models so that [EOS] Can Focus on Semantic Termination
 
 [![arXiv](https://img.shields.io/badge/arXiv-2606.17999-b31b1b.svg)](https://arxiv.org/abs/2606.17999)
 [![Dream Void](https://img.shields.io/badge/HF%20Model-Dream%20Void-yellow)](https://huggingface.co/akpon900/dream-instruct-void)
 [![LLaDA Void](https://img.shields.io/badge/HF%20Model-LLaDA%20Void-yellow)](https://huggingface.co/akpon900/llada-instruct-void)
 
-VoidPadding lets `[VOID]` handle padding in masked diffusion language models so
-that `[EOS]` can focus on semantic termination.
+
 
 <p align="center">
   <img src="figures/voidpadding.png" alt="VoidPadding logo" width="360">
